@@ -1,0 +1,30 @@
+# =========================
+# Core scientific stack
+# =========================
+numpy
+pandas
+scipy
+tifffile
+
+# =========================
+# Imaging + visualization
+# =========================
+scikit-image
+opencv-python           # use opencv-python-headless on servers
+matplotlib
+seaborn
+
+# =========================
+# Segmentation
+# =========================
+cellpose
+torch                   # cellpose needs PyTorch; pick the right wheel for your OS/GPU
+
+# =========================
+# Optional: comparison/analytics
+# (include if your comparaison/ directory uses these)
+# =========================
+umap-learn              # used by UMAP.py
+scikit-learn            # common dependency for UMAP & ML helpers
+statsmodels             # for normality tests/ANOVA etc. if used
+scikit-posthocs         # for multiple-comparison post hoc tests if used

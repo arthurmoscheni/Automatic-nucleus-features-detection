@@ -5,10 +5,24 @@ import warnings
 
 warnings.filterwarnings('ignore')
 
-# Import segmentation module
-from segmentation import run_batch_segmentation
-from image_analysis import prepare_image_data_for_analysis, run_morphological_analysis, print_analysis_summary
-from dna_analysis import prepare_dna_data_for_analysis, run_dna_analysis
+# from segmenter import (
+#     prepare_image_data_for_analysis,
+#     run_morphological_analysis,
+#     save_morpho_combined_results,  # already called inside run_morphological_analysis, but available
+#     print_analysis_summary,
+#     prepare_dna_data_for_analysis,
+#     run_dna_analysis,
+#     save_dna_results,
+#     quick_dna_insights,
+#     run_batch_segmentation,
+# )
+from pipelines.dna import run_dna_analysis
+from utils.data import prepare_dna_data_for_analysis, prepare_image_data_for_analysis, print_analysis_summary
+from io_utils.save import save_dna_results, save_morpho_combined_results
+from viz.dna import quick_dna_insights
+from pipelines.morphology import run_morphological_analysis
+from pipelines.segmentation import run_batch_segmentation
+
 
 visualization = False  # Set to False to disable visualizations
 
@@ -58,26 +72,33 @@ def process_folder(folder_name, image_list, output_dir, visualization=visualizat
     # Run batch segmentation
     batch_results = run_batch_segmentation(image_list, folder_output_dir, visualization=False)
     
-    # Morphological analysis
-    image_data_list_morpho = prepare_image_data_for_analysis(batch_results)
-    print(f"✓ Prepared {len(image_data_list_morpho)} images for morphological analysis")
-    
-    morpho_results = run_morphological_analysis(
-        image_data_list_morpho, folder_output_dir, 
-        visualization=visualization, pixel_size_um=0.124
-    )
-    print_analysis_summary(morpho_results)
-    
-    # DNA analysis
-    print("Preparing DNA data...")
-    dna_data_list = prepare_dna_data_for_analysis(batch_results)
-    print(f"✓ Prepared {len(dna_data_list)} DNA dataset")
-    
-    print("Running DNA analysis...")
-    run_dna_analysis(dna_data_list, folder_output_dir, visualization=visualization)
-    
-    print(f"✓ Completed processing folder: {folder_name}")
 
+
+    # batch_results = ...  # your dict from upstream
+    image_list = prepare_image_data_for_analysis(batch_results)
+
+    morpho_results = run_morphological_analysis(
+        image_list,
+        output_dir=folder_output_dir,
+        visualization=visualization,
+        pixel_size_um=0.124,
+        )
+
+    print_analysis_summary(morpho_results)
+
+    
+    dna_inputs = prepare_dna_data_for_analysis(batch_results)
+
+    df = run_dna_analysis(
+        dna_inputs,
+        output_dir= folder_output_dir,
+        visualization=visualization,           # produces overlays via viz/
+        overlay_method="original",
+    )
+
+    if not df.empty:
+        save_dna_results(df, output_dir=folder_output_dir)
+        # quick_dna_insights(df, save_path=os.path.join(output_dir, "dna_insights.png"), show=False)
 
 def main():
     """Main function to orchestrate the image processing workflow."""

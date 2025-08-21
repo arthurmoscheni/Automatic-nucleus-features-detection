@@ -1,116 +1,171 @@
-import pandas as pd
-from tkinter import filedialog
-import tkinter as tk
+"""
+Four-group comparison entrypoint.
+
+Usage (from repo root):
+    python -m comparaison.main4groups
+"""
+
 import os
-from utils import prepare_morpho_data, prepare_dna_data, remove_outliers
-from multicomparaison import MultiGroupAnalysis
+import pandas as pd
+import tkinter as tk
+from tkinter import filedialog
 
-def select_file(file_type, group_number):
-    """Select a CSV file using file dialog."""
-    print(f"Select the {file_type} CSV file for group {group_number}:")
-    return filedialog.askopenfilename(
-        title=f"Select {file_type} CSV file for group {group_number}",
-        filetypes=[("CSV files", "*.csv"), ("All files", "*.*")]
+# utils
+from utils.data_prep import (
+    prepare_morpho_data,
+    prepare_dna_data,
+    remove_outliers,  # optional
+)
+
+from pipelines.multigroup_pipeline import MultiGroupPipeline
+
+
+# ---------------------------
+# File selection conveniences
+# ---------------------------
+
+GROUP_LABELS = [
+    ("Young", "WT"),
+    ("Young", "APP"),
+    ("Aged",  "WT"),
+    ("Aged",  "APP"),
+]
+
+def select_file(kind: str, age: str, genotype: str) -> str:
+    """Open a file dialog to pick a CSV for a specific (age, genotype) group."""
+    title = f"Select {kind} CSV for {age} {genotype}"
+    print(title + "...")
+    path = filedialog.askopenfilename(
+        title=title,
+        filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
     )
+    if not path:
+        raise FileNotFoundError(f"Missing selection for {kind} / {age} {genotype}")
+    return path
 
-def get_folder_name(file_path):
-    """Extract folder name from file path."""
-    return os.path.basename(os.path.dirname(file_path))
+
+def parent_folder_name(path: str) -> str:
+    """Return the folder name one level above the file."""
+    return os.path.basename(os.path.dirname(path)) or ""
+
+
+# ---------------------------
+# Loading & preparation
+# ---------------------------
+
+def load_csvs(paths: dict[str, str]) -> dict[str, pd.DataFrame]:
+    """Load all CSVs into dataframes."""
+    dfs = {}
+    for key, p in paths.items():
+        df = pd.read_csv(p)
+        dfs[key] = df
+        print(f"Loaded {key}: {df.shape}")
+    return dfs
+
+
+def prepare_morpho_for_4_groups(morpho_dfs: dict[str, pd.DataFrame]):
+    """
+    Prepare morpho features using the feature set derived from (Young WT vs Young APP).
+    Other groups are aligned to that feature list.
+    """
+    m1, m2 = morpho_dfs["morpho_young_wt"], morpho_dfs["morpho_young_app"]
+    m3, m4 = morpho_dfs["morpho_aged_wt"], morpho_dfs["morpho_aged_app"]
+
+    m1_p, m2_p, features = prepare_morpho_data(m1, m2, features=None)
+    # Align aged groups to the same feature list
+    m3_p = m3.dropna()[features]
+    m4_p = m4.dropna()[features]
+
+    print("\nMorpho features selected:", len(features))
+    return m1_p, m2_p, m3_p, m4_p, features
+
+
+def prepare_dna_for_4_groups(dna_dfs: dict[str, pd.DataFrame]):
+    """
+    Prepare DNA features using the feature set derived from (Young WT vs Young APP).
+    Other groups are aligned to that feature list.
+    """
+    d1, d2 = dna_dfs["dna_young_wt"], dna_dfs["dna_young_app"]
+    d3, d4 = dna_dfs["dna_aged_wt"], dna_dfs["dna_aged_app"]
+
+    d1_p, d2_p, features = prepare_dna_data(d1, d2, features=None)
+    # Align aged groups to the same feature list
+    d3_p = d3.dropna()[features]
+    d4_p = d4.dropna()[features]
+
+    print("\nDNA features selected:", len(features))
+    return d1_p, d2_p, d3_p, d4_p, features
+
+
+# ---------------------------
+# Main runner
+# ---------------------------
 
 def main():
-    # Initialize tkinter (hidden window)
+    # Hidden Tk root
     root = tk.Tk()
     root.withdraw()
-    
-    # File selection for 4 groups (morpho and DNA files)
+
+    # ---- Pick files (explicit prompts map cleanly to the analyzer's semantics) ----
     print("=== File Selection ===")
-    file_paths = {}
-    
-    for group in range(1, 5):
-        file_paths[f'morpho{group}'] = select_file("morpho", group)
-        file_paths[f'dna{group}'] = select_file("DNA", group)
-    
-    # Extract group names from folder structure
-    print("\n=== Group Names ===")
-    group_names = {}
-    for key, path in file_paths.items():
-        folder_name = get_folder_name(path)
-        group_names[key] = folder_name
-        print(f"{key.upper()} folder: {folder_name}")
-    
-    # Load morphological data
-    print("\n=== Loading Morphological Data ===")
-    morpho_dataframes = {}
-    for group in range(1, 5):
-        path = file_paths[f'morpho{group}']
-        morpho_dataframes[f'morpho{group}'] = pd.read_csv(path)
-        print(f"Loaded morpho{group} with shape: {morpho_dataframes[f'morpho{group}'].shape}")
-    
-    # Load DNA data
-    print("\n=== Loading DNA Data ===")
-    dna_dataframes = {}
-    for group in range(1, 5):
-        path = file_paths[f'dna{group}']
-        dna_dataframes[f'dna{group}'] = pd.read_csv(path)
-        print(f"Loaded dna{group} with shape: {dna_dataframes[f'dna{group}'].shape}")
-    
-    # Prepare morphological data (groups 1&2, then 3&4)
+    morpho_paths = {}
+    dna_paths = {}
+    for age, geno in GROUP_LABELS:
+        key_m = f"morpho_{age.lower()}_{geno.lower()}"
+        key_d = f"dna_{age.lower()}_{geno.lower()}"
+        morpho_paths[key_m] = select_file("morpho", age, geno)
+        dna_paths[key_d] = select_file("DNA", age, geno)
+
+    # Group names derived from parent folders (purely informative)
+    print("\n=== Group Folders (by selected files) ===")
+    for key, p in {**morpho_paths, **dna_paths}.items():
+        print(f"{key}: {parent_folder_name(p)}")
+
+    # ---- Load ----
+    print("\n=== Loading CSVs ===")
+    morpho_dfs = load_csvs(morpho_paths)
+    dna_dfs = load_csvs(dna_paths)
+
+    # ---- Prepare (feature selection on Young WT vs Young APP; align others) ----
     print("\n=== Preparing Morphological Data ===")
-    morpho1, morpho2, morpho_features = prepare_morpho_data(
-        morpho_dataframes['morpho1'], 
-        morpho_dataframes['morpho2'], 
-        features=None
-    )
-    morpho3, morpho4, _ = prepare_morpho_data(
-        morpho_dataframes['morpho3'], 
-        morpho_dataframes['morpho4'], 
-        features=None
-    )
-    
-    # Prepare DNA data (groups 1&2, then 3&4)
+    m1, m2, m3, m4, morpho_features = prepare_morpho_for_4_groups(morpho_dfs)
+
     print("\n=== Preparing DNA Data ===")
-    dna1, dna2, dna_features = prepare_dna_data(
-        dna_dataframes['dna1'], 
-        dna_dataframes['dna2'], 
-        features=None
+    d1, d2, d3, d4, dna_features = prepare_dna_for_4_groups(dna_dfs)
+
+    # Optional: outlier removal (example, disabled by default)
+    # for k, df in {"m1": m1, "m2": m2, "m3": m3, "m4": m4}.items():
+    #     print(f"\nOutlier removal on morpho {k} (IQR, 1.5)...")
+    #     locals()[k] = remove_outliers(df, method="iqr", threshold=1.5)
+    # for k, df in {"d1": d1, "d2": d2, "d3": d3, "d4": d4}.items():
+    #     print(f"\nOutlier removal on DNA {k} (IQR, 1.5)...")
+    #     locals()[k] = remove_outliers(df, method="iqr", threshold=1.5)
+
+    # ---- Run analyses (morpho) ----
+    print("\n=== Running Morphological Multi-Group Analysis ===")
+    plot = True
+    morpho_analysis = MultiGroupPipeline(
+        young_wt=m1,
+        young_app=m2,
+        aged_wt=m3,
+        aged_app=m4,
+        features=morpho_features,
+        
     )
-    dna3, dna4, _ = prepare_dna_data(
-        dna_dataframes['dna3'], 
-        dna_dataframes['dna4'], 
-        features=None
+    morpho_results = morpho_analysis.run(alpha=0.05, plot=plot)
+    # ---- Run analyses (DNA) ----
+    print("\n=== Running DNA Multi-Group Analysis ===")
+    dna_analysis = MultiGroupPipeline(
+        young_wt=d1,
+        young_app=d2,
+        aged_wt=d3,
+        aged_app=d4,
+        features=dna_features,
     )
-    
-    # Optional filtering (currently commented out)
-    # morpho1, morpho2, morpho3, morpho4 = apply_morpho_filters(morpho1, morpho2, morpho3, morpho4)
-    
-    # Run morphological analysis
-    print("\n=== Running Morphological Analysis ===")
-    morpho_analyzer = MultiGroupAnalysis(morpho1, morpho2, morpho3, morpho4, morpho_features)
-    morpho_results = morpho_analyzer.run_all()
-    
-    # Run DNA analysis
-    print("\n=== Running DNA Analysis ===")
-    dna_analyzer = MultiGroupAnalysis(dna1, dna2, dna3, dna4, dna_features)
-    dna_results = dna_analyzer.run_all()
-    
-    print("\n=== Analysis Complete ===")
+    dna_results = dna_analysis.run(alpha=0.05, plot=plot)
+    print("\n=== Multi-Group Analysis Complete ===")
     return morpho_results, dna_results
 
-def apply_morpho_filters(morpho1, morpho2, morpho3, morpho4):
-    """Apply ACI and solidity filters to morphological data."""
-    filter_condition = lambda df: df[(df['ACI'] >= 0.65) & (df['solidity'] >= 0.75)]
-    
-    morpho1_filtered = filter_condition(morpho1)
-    morpho2_filtered = filter_condition(morpho2)
-    morpho3_filtered = filter_condition(morpho3)
-    morpho4_filtered = filter_condition(morpho4)
-    
-    print(f"After filtering - morpho1 shape: {morpho1_filtered.shape}")
-    print(f"After filtering - morpho2 shape: {morpho2_filtered.shape}")
-    print(f"After filtering - morpho3 shape: {morpho3_filtered.shape}")
-    print(f"After filtering - morpho4 shape: {morpho4_filtered.shape}")
-    
-    return morpho1_filtered, morpho2_filtered, morpho3_filtered, morpho4_filtered
 
 if __name__ == "__main__":
-    morpho_results, dna_results = main()
+    main()
