@@ -1,30 +1,30 @@
-# =========================
 # Core scientific stack
-# =========================
-numpy
-pandas
-scipy
-tifffile
+numpy>=1.24
+pandas>=1.5
+scipy>=1.10
+scikit-learn>=1.3
+umap-learn>=0.5
+statsmodels>=0.14
+scikit-posthocs>=0.7
 
-# =========================
-# Imaging + visualization
-# =========================
-scikit-image
-opencv-python           # use opencv-python-headless on servers
-matplotlib
-seaborn
+# Plotting
+matplotlib>=3.7
+seaborn>=0.12
 
-# =========================
-# Segmentation
-# =========================
-cellpose
-torch                   # cellpose needs PyTorch; pick the right wheel for your OS/GPU
+# Imaging / segmentation
+scikit-image>=0.21
+opencv-python-headless>=4.8
+imageio>=2.31
+cellpose>=2.3
 
-# =========================
-# Optional: comparison/analytics
-# (include if your comparaison/ directory uses these)
-# =========================
-umap-learn              # used by UMAP.py
-scikit-learn            # common dependency for UMAP & ML helpers
-statsmodels             # for normality tests/ANOVA etc. if used
-scikit-posthocs         # for multiple-comparison post hoc tests if used
+# (Optional) ML models used in classification
+xgboost>=1.7
+lightgbm>=4.0
+
+# NOTE:
+# - Cellpose needs PyTorch. Install the appropriate wheel for your platform:
+#   pip install --index-url https://download.pytorch.org/whl/cu124 torch torchvision torchaudio  # CUDA 12.4
+#   pip install torch torchvision torchaudio  # CPU-only (or see pytorch.org)
+#
+# - tkinter (used for file dialogs) is part of the Python standard library.
+#   On Linux you may need the OS package: sudo apt-get install python3-tk
