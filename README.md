@@ -38,6 +38,9 @@ Create and activate a conda environment with the required dependencies:
 1) To compare 2 dataframes, go to comparaison/main_2groups.py
 2) Run the script
 3) Select the data frames in this order exactly: morphological features from the 1st population, DNA features from the 1st population, morphological features from the 2nd population, DNA features from 2nd population.
+   
+Note: to change the size of the pixel, modify the value line 124 of main.py <img width="570" height="167" alt="image" src="https://github.com/user-attachments/assets/f6ed0c66-5224-460d-b53f-a715e78630fd" />
+
 ### 4 groups comparaison
 1) To compare 4 dataframes, go to comparaison/main_4groups.py
 2) Run the script
