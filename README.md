@@ -1,23 +1,37 @@
-# Automated-nucleus-morphological-change-detection# Automated-nucleus-morphological-change-detection
+# Automated-nucleus-morphological-change-detection_
+
+## Copy the repository
+1) Click on the green button <img width="947" height="222" alt="image" src="https://github.com/user-attachments/assets/670bc17e-1c0e-402a-8f85-c51a227e6fb8" />
+2) Copy the HTTPS link <img width="530" height="334" alt="image" src="https://github.com/user-attachments/assets/0f8d92ea-e38b-4eb0-a6bc-951ef7779062" />
+3) Create a folder in your files (it is where the code will be located) and go in this folder
+4) Go to the terminal (right click then "open in terminal") <img width="743" height="477" alt="image" src="https://github.com/user-attachments/assets/482dbf62-50d8-4da5-b2ff-2e9129bd266a" />
+5) Write in the terminal "git clone + the link" and press enter <img width="1093" height="68" alt="image" src="https://github.com/user-attachments/assets/a675447a-9b2b-4398-a3fc-2fd7fd981fe1" />
+6) All the code is now in this folder
+   
 
 ## Installation
 
 Create and activate a conda environment with the required dependencies:
 
+1) Go to the app "Anaconda Prompt"
+2) Write in the terminal: ``` conda create -n features-detection --file conda-requirements.txt -c conda-forge -c pytorch ```
+3) When the environment is created: ``` conda activate features-detection ```
+
+## Using the code 
+1) Open VScode
+2) Open the folder containing the code. The files opened should look like this <img width="299" height="125" alt="image" src="https://github.com/user-attachments/assets/0a966ce6-b9c0-496b-ab86-8fcb8f89be1e" />
+
+
+
+
+
+
+
+
+
+
 ```bash
-conda create -n bio-compare --file conda-requirements.txt -c conda-forge -c pytorch
+conda create -n features-detection --file conda-requirements.txt -c conda-forge -c pytorch
 conda activate bio-compare
 conda config --set channel_priority strict
 ```
-
-
-## Clone Repository
-
-To copy this project to your local machine:
-
-```bash
-git clone <repository-url>
-cd Automatic-nucleus-features-detection
-```
-
-Replace `<repository-url>` with the actual GitHub repository URL.
