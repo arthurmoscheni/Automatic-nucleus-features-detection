@@ -3,10 +3,20 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from matplotlib.patches import Patch
-
+from typing import Dict
 
 class MultiGroupViz:
     """All plotting utilities for the 4-group workflow."""
+    
+    def __init__(self, groups: Dict[str, pd.DataFrame]):
+        self.groups = groups
+        self.group_names = list(groups.keys())
+        # Define colors for each group
+        self.colors = {
+            group_name: plt.cm.Set1(i) for i, group_name in enumerate(self.group_names)
+        }
+        
+
 
     def plot_kw(self, kw_results, figsize=(15, 10), alpha=0.05):
         import numpy as np
@@ -24,13 +34,6 @@ class MultiGroupViz:
         fig, axes = plt.subplots(n_rows, n_cols, figsize=figsize)
         axes = np.atleast_1d(axes).ravel()
 
-        colors = {
-            "young_wt":  "#4A90E2",
-            "young_app": "#1F5F99",
-            "aged_wt":   "#E85D75",
-            "aged_app":  "#B73E56",
-        }
-
         for ax, (feature, res) in zip(axes, results.items()):
             group_data  = res["group_data"]
             group_order = res["group_order"]
@@ -40,7 +43,7 @@ class MultiGroupViz:
 
             # Color boxes according to the *actual* order
             for patch, gname in zip(box_parts["boxes"], group_order):
-                patch.set_facecolor(colors.get(gname, "gray"))
+                patch.set_facecolor(self.colors.get(gname, "gray"))
                 patch.set_alpha(0.7)
                 patch.set_edgecolor("black")
                 patch.set_linewidth(1)
@@ -59,13 +62,11 @@ class MultiGroupViz:
         for ax in axes[len(results):]:
             ax.set_visible(False)
 
-        legend_elements = [
-            Patch(facecolor=colors["young_wt"],  alpha=0.7, label="Young WT"),
-            Patch(facecolor=colors["young_app"], alpha=0.7, label="Young APP"),
-            Patch(facecolor=colors["aged_wt"],   alpha=0.7, label="Aged WT"),
-            Patch(facecolor=colors["aged_app"],  alpha=0.7, label="Aged APP"),
-        ]
-        fig.legend(handles=legend_elements, loc="upper right", bbox_to_anchor=(0.98, 0.98))
+        # legend_elements = [
+        #     Patch(facecolor=self.colors.get(group_name, "gray"), alpha=0.7, label=group_name)
+        #     for group_name in self.group_names
+        # ]
+        # fig.legend(handles=legend_elements, loc="upper right", bbox_to_anchor=(0.98, 0.98))
         plt.tight_layout()
         plt.show()
 
@@ -157,8 +158,7 @@ class MultiGroupViz:
         scaler = RobustScaler(); Xs = scaler.fit_transform(X)
         pca = PCA(n_components=2, random_state=42)
         Xp = pca.fit_transform(Xs)
-        colors_dict = {'young_wt': '#4A90E2', 'young_app': '#1F5F99',
-                       'aged_wt': '#E85D75', 'aged_app': '#B73E56'}
+        colors_dict = {group: self.colors[group] for group in self.group_names}
         for group in df['group'].unique():
             mask = df['group'] == group
             ax.scatter(Xp[mask, 0], Xp[mask, 1], c=colors_dict.get(group, 'gray'),

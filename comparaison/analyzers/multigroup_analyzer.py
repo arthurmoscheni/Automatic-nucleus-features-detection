@@ -25,22 +25,19 @@ class MultiGroupAnalyzer:
     Groups: young_wt, young_app, aged_wt, aged_app.
     """
 
-    def __init__(self, young_wt_data: pd.DataFrame, young_app_data: pd.DataFrame,
+    def __init__(self, groups, young_wt_data: pd.DataFrame, young_app_data: pd.DataFrame,
                  aged_wt_data: pd.DataFrame, aged_app_data: pd.DataFrame,
                  features: List[str]):
+        self.group_names = list(groups.keys())
+
         self.young_wt = young_wt_data
         self.young_app = young_app_data
         self.aged_wt = aged_wt_data
         self.aged_app = aged_app_data
         self.features = features
 
-        self.groups: Dict[str, pd.DataFrame] = {
-            'young_wt': self.young_wt,
-            'young_app': self.young_app,
-            'aged_wt': self.aged_wt,
-            'aged_app': self.aged_app
-        }
-        self.group_names = list(self.groups.keys())
+        self.groups: Dict[str, pd.DataFrame] = groups
+        self.group_names = list(groups.keys())
 
     # ------------- Kruskal–Wallis + Dunn + Cliff's -------------
     def kruskal_wallis_analysis(self, alpha: float = 0.05):

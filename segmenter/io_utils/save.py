@@ -21,7 +21,7 @@ def save_morpho_combined_results(morpho_results: dict, output_dir: str) -> pd.Da
     print(f"Wrinkles results saved to: {os.path.join(output_dir, 'combined_wrinkles.csv')}")
     print(f"Signal intensities results saved to: {os.path.join(output_dir, 'combined_signal_intensities.csv')}")
 
-    combined_path = os.path.join(output_dir, "combined_df.csv")
+    combined_path = os.path.join(output_dir, "morphological_features.csv")
     combined_df = pd.merge(combined_features, all_aci_results, on=['image_id', 'label'], how='left')
     combined_df = pd.merge(combined_df, wrinkles_results, on=['image_id', 'label'], how='left')
     combined_df = pd.merge(combined_df, signal_intensities, on=['image_id', 'label'], how='left')

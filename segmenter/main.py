@@ -59,7 +59,7 @@ def get_subfolders_with_images(parent_folder):
     return subfolders
 
 
-def process_folder(folder_name, image_list, output_dir, visualization=visualization):
+def process_folder(pixel_size_um, folder_name, image_list, output_dir, visualization=visualization):
     """Process a single folder with images."""
     print(f"\n{'='*50}")
     print(f"Processing folder: {folder_name}")
@@ -81,7 +81,7 @@ def process_folder(folder_name, image_list, output_dir, visualization=visualizat
         image_list,
         output_dir=folder_output_dir,
         visualization=visualization,
-        pixel_size_um=0.124,
+        pixel_size_um=pixel_size_um,  # set to None to use default
         )
 
     print_analysis_summary(morpho_results)
@@ -121,10 +121,10 @@ def main():
     output_dir = select_output_directory()
     if not output_dir:
         return
-    
+    pixel_size_um = 0.124  # Default pixel size
     # Process each subfolder
     for folder_name, image_list in subfolders_dict.items():
-        process_folder(folder_name, image_list, output_dir)
+        process_folder(pixel_size_um, folder_name, image_list, output_dir)
     
     print(f"\n{'='*50}")
     print("All folders processed successfully!")

@@ -23,7 +23,7 @@ class ImageAnalyzer:
 
     def __init__(
         self,
-        pixel_size_um: float = 0.124,
+        pixel_size_um: float = None,
         threshold_method: str = 'original',   # kept for backward-compat
         threshold_value: Optional[float] = None
     ):

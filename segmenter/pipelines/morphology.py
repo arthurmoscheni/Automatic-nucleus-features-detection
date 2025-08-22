@@ -14,7 +14,7 @@ from io_utils.save import save_morpho_combined_results
 
 def process_single_image(
     image_data: Dict,
-    pixel_size_um: float = 0.124,
+    pixel_size_um: float = None,
     min_circularity: float = 0.4,
     min_area_um2: float = 20,
     min_arc_length: int = 40,
@@ -99,7 +99,7 @@ def process_single_image(
 
 def process_multiple_images(
     image_data_list: List[Dict],
-    pixel_size_um: float = 0.124,
+    pixel_size_um: float = None,
     min_circularity: float = 0.4,
     min_area_um2: float = 20,
     min_arc_length: int = 40,
