@@ -27,7 +27,18 @@ Create and activate a conda environment with the required dependencies:
 ## Using the code 
 1) Open VScode
 2) Open the folder containing the code. The files opened should look like this <img width="299" height="125" alt="image" src="https://github.com/user-attachments/assets/0a966ce6-b9c0-496b-ab86-8fcb8f89be1e" />
+# Segmentation
+1) To use the segmentation, go to /segmenter/main.py
+2) Click on the arrow on the top right of the page <img width="181" height="80" alt="image" src="https://github.com/user-attachments/assets/35316015-e074-4700-a517-c978d03cfc42" />
+3) Select the folder that contains folders of your images
+4) Select the folder where you want the results to be stored (the names of the results will be automatically determined from the input names)
+5) Let the code run (it can take a bit of time if you have a lot of images)
+# Comparaison
 
+1) To compare 2 dataframes, go to comparaison/main_2groups.py
+2) Run the script
+3) Select the data frames in this order exactly: morphological features from the 1st population, DNA features from the 1st population, morphological features from the 2nd population, DNA features from 2nd population.
+   
 
 
 
