@@ -1,5 +1,12 @@
 # Automated-nucleus-morphological-change-detection_
 
+## Table of Contents
+
+- [Copy the repository](#copy-the-repository)
+- [Installation](#installation)
+- [Using the code](#using-the-code)
+
+
 ## Copy the repository
 1) Click on the green button <img width="947" height="222" alt="image" src="https://github.com/user-attachments/assets/670bc17e-1c0e-402a-8f85-c51a227e6fb8" />
 2) Copy the HTTPS link <img width="530" height="334" alt="image" src="https://github.com/user-attachments/assets/0f8d92ea-e38b-4eb0-a6bc-951ef7779062" />
