@@ -50,9 +50,3 @@ Create and activate a conda environment with the required dependencies:
 
 
 
-
-```bash
-conda create -n features-detection --file conda-requirements.txt -c conda-forge -c pytorch
-conda activate bio-compare
-conda config --set channel_priority strict
-```
