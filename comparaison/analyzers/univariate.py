@@ -129,7 +129,7 @@ class UnivariateComparison:
         )
 
     # ---------- one-call runner (kept semantics) ----------
-    def run_all(self, alpha: float = 0.05, visualization: bool = False) -> pd.DataFrame:
+    def run_all(self, alpha: float = 0.05, visualization: bool = True) -> pd.DataFrame:
         results_df = self.comprehensive_tests(alpha=alpha)
         if visualization:
             self.plot_pvalue_histogram(results_df, test_type="mwu", corrected=True)
